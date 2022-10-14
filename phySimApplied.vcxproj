@@ -157,18 +157,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="demo.cpp" />
-    <ClCompile Include="Dragging.cpp" />
-    <ClCompile Include="Kinematics.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Vector2d.cpp" />
-    <ClCompile Include="Vector3d.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Dragging.h" />
-    <ClInclude Include="Kinematics.h" />
-    <ClInclude Include="Vector2d.h" />
-    <ClInclude Include="Vector3d.h" />
+    <ClInclude Include="Includes.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Rocket.h" />
+    <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
