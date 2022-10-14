@@ -34,11 +34,11 @@ double timeElapsed = 0;
 class Object {
 public:
 	sf::Shape* drawable;
+	float mass;
 protected:
 	sf::Vector2f position;
 	sf::Vector2f velocity;
 	sf::Vector2f acceleration;
-	float mass;
 };
 
 class Rocket : public Object {
@@ -50,14 +50,6 @@ private:
 		position = newPos;
 	}
 
-	void setVel(sf::Vector2f newVel) {
-		velocity = newVel;
-	}
-
-	void setAcc(sf::Vector2f newAcc) {
-		acceleration = newAcc;
-	}
-
 public:
 	Rocket(sf::Vector2f pos, float m, sf::CircleShape& shape) {
 		setPos(pos); setVel({ 0.0f, 0.0f }); setAcc({ 0.0f, 9.81f });
@@ -65,11 +57,29 @@ public:
 		drawable = &shape;
 	}
 
+	sf::Vector2f getPos() {
+		return position;
+	}
+
+	sf::Vector2f getVel() {
+		return velocity;
+	}
+
+	void setAcc(sf::Vector2f a) {
+		acceleration = a;
+	}
+
+	void setVel(sf::Vector2f v) {
+		velocity = v;
+	}
+
 	//simulate rocket by one "step", or delta t. 
 	//returns new position after one step
 	sf::Vector2f simStep(float step) {
 		setPos(position + (velocity * step));
 		setVel(velocity + (acceleration * step));
+		
+		updateShape();
 
 		return position;
 	}
@@ -100,10 +110,63 @@ public:
 
 		acceleration = newAccelerationVector;
 	}
+
+	void reset() {
+		sf::Vector2f resetPos = { (WIDTH / 2.0f) - mass, (HEIGHT / 2.0f) - mass };
+		setPos(resetPos);
+		setVel({ 0.0f, 0.0f });
+		setAcc({ 0.0f, 9.81f });
+		drawable->setPosition(position);
+	}
+
+	void grab() {
+		sf::Vector2f grabPos = { sf::Mouse::getPosition(window).x - (mass), sf::Mouse::getPosition(window).y - (mass) };
+		setPos(grabPos);
+		setVel({ 0.0f, 0.0f });
+	}
 };
 
 namespace utils {
+	//if the distance between the mouse and the shape is less than the radius of the shape, return true
+	//else return false
+	bool isGrabbing(sf::CircleShape& shape) {
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			float xp = sf::Mouse::getPosition(window).x;
+			float yp = sf::Mouse::getPosition(window).y;
 
+			float xc = shape.getPosition().x + shape.getRadius();
+			float yc = shape.getPosition().y + shape.getRadius();
+
+			//distance formula
+			float distance = sqrtf(powf(xp - xc, 2) + powf(yp - yc, 2));
+
+			if (distance < shape.getRadius()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void startPullEvent(Rocket &rocket) {
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+			//if we are holding the mouse button, accelerate towards the mouse position
+			rocket.pullTowardsPoint();
+
+			//setup line vertices to draw between the cursor and the ball
+			sf::Vertex vertices[2] =
+			{
+				sf::Vertex({rocket.drawable->getPosition().x + rocket.mass, rocket.drawable->getPosition().y + rocket.mass}),
+				sf::Vertex({(float)sf::Mouse::getPosition(window).x, (float)sf::Mouse::getPosition(window).y})
+			};
+
+			//draw the line
+			window.draw(vertices, 2, sf::Lines);
+		}
+		else {
+			//reset the acceleration
+			rocket.setAcc({ 0, 9.81 });
+		}
+	}
 };
 
 //dt is set at a fraction of the framerate. So instead of updating where it should be an arbitrary number of times, it updates where we should be 
@@ -113,89 +176,13 @@ float dt = 0.01f;
 //size of the ball object
 float radius = 20.0f;
 
-float timeLimit = 2.0f;
-
-//if the distance between the mouse and the shape is less than the radius of the shape, return true
-//else return false
-bool isGrabbing(sf::CircleShape& shape) {
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-		float xp = sf::Mouse::getPosition(window).x;
-		float yp = sf::Mouse::getPosition(window).y;
-
-		float xc = shape.getPosition().x + shape.getRadius();
-		float yc = shape.getPosition().y + shape.getRadius();
-
-		//distance formula
-		float distance = sqrtf(powf(xp - xc, 2) + powf(yp - yc, 2));
-
-		if (distance < shape.getRadius()) {
-			return true;
-		}
-	}
-	return false;
-}
-
-//modify the acceleration of the shape to point towards the mouse cursor
-void pullTowardsMouse(sf::CircleShape& shape, vecSpace::Vector2d& acceleration) {
-	//arbitrary value we use to slow the acceleration, if this was 1.0f it would teleport to the mouse pos
-	float magnitude = 0.1f;
-	
-	float mousex = sf::Mouse::getPosition(window).x;
-	float mousey = sf::Mouse::getPosition(window).y;
-
-	vecSpace::Vector2d  newAccelerationVector;
-
-	//to calculate the acceleration vector, we simply subtract the mouse vector and shape vector and 
-	//multiply by our arbitrary magnitude to produce a vector from the shape in the direction of the mouse
-	newAccelerationVector.setXYZ((mousex - shape.getPosition().x) * magnitude, ((mousey - shape.getPosition().y) * magnitude) + 9.81f);
-
-	acceleration = newAccelerationVector;
-}
-
-//takes in one circle object and moves it around on the screen. Recall our first few meetings to understand why we multiply by dt
-void updateShape(sf::CircleShape& circle, vecSpace::Vector2d& position, vecSpace::Vector2d& velocity, vecSpace::Vector2d& acceleration)
-{
-	timeElapsed += dt;
-
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-		//if we are holding the mouse button, accelerate towards the mouse position
-		pullTowardsMouse(circle, acceleration);
-
-		//setup line vertices to draw between the cursor and the ball
-		sf::Vertex vertices[2] =
-		{
-			sf::Vertex({circle.getPosition().x + circle.getRadius(), circle.getPosition().y + circle.getRadius()}),
-			sf::Vertex({(float)sf::Mouse::getPosition(window).x, (float)sf::Mouse::getPosition(window).y})
-		};
-
-		//draw the line
-		window.draw(vertices, 2, sf::Lines);
-	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-		acceleration.setXYZ(0, acceleration.y - 0.14f);
-	}
-	else {
-		//reset the acceleration
-		acceleration.setXYZ(0, 9.81);
-	}
-
-	position = position + (velocity * dt);
-	velocity = velocity + (acceleration * dt);
-
-	//if it is at the bottom or near the bottom, we should stop so it doesnt continue out of the screen.
-	if (position.y < (float)HEIGHT - (radius * 3.14f)) {
-		circle.setPosition(position.x + radius, position.y + radius); circle.setFillColor(sf::Color::Green);
-	}
-	else { 
-		circle.setFillColor(sf::Color::Red); 
-		velocity.setXYZ(0, 0); 
-	}
-}
+sf::Vector2f lastMousePos;
+sf::Vector2f curMousePos;
+sf::Vector2f deltaMouse;
 
 //-------------------------------------------------MAIN FUNCTION-----------------------------------------------------------//
 int main()
 {
-	// ---------- LOAD BULLDOG ROCKETRY IMAGE ---------- //
 	auto bulldogRocketryImage = sf::Image{};
 	if (!bulldogRocketryImage.loadFromFile("icon.png"))
 	{
@@ -212,7 +199,6 @@ int main()
 	bulldogRocketrySprite.setPosition(0, 0);
 	bulldogRocketrySprite.setScale({ 0.1f, 0.1f });
 
-	// ---------- SETUP DEBUG STATS ---------- //
 	sf::Font font;
 	if (!font.loadFromFile("arial.ttf")) {
 		// Error handling...
@@ -221,29 +207,20 @@ int main()
 	text.setFont(font);
 	text.setCharacterSize(16);
 	text.setFillColor(sf::Color::Red);
-	text.setPosition(WIDTH - (text.getGlobalBounds().width * 2), 20);
+	//text.setPosition(WIDTH - (text.getGlobalBounds().width * 2), 20);
 	std::string stats = "";
 	text.setString(stats);
+	text.setPosition(WIDTH - 220, 20);
 
 	//clock we use to claculate fps and dt
 	sf::Clock clock;
-	float lastTime = 0;
 
 	//creating our ball. It is green!
 	sf::CircleShape shape(radius);
 	shape.setFillColor(sf::Color::Green);
-
-	//the ball will start at the top left. Remember to offset if you want to move according to its center!
 	shape.setPosition(0, 0);
 
-	//initialize vectors
-	vecSpace::Vector2d position;
-	vecSpace::Vector2d velocity;
-	vecSpace::Vector2d acceleration;
-
-	position.setXYZ(shape.getPosition().x, shape.getPosition().y);
-	velocity.setXYZ(0, 0);
-	acceleration.setXYZ(0, 9.81);
+	Rocket rocket = Rocket({ 0,0 }, radius, shape);
 
 	//we use this to determine total sim time
 	sf::Clock timer;
@@ -251,8 +228,11 @@ int main()
 	bool holding = false;
 	bool grabbingAndHolding = false;
 
+	lastMousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
+
 	while (window.isOpen())
 	{
+		
 		//SFML stuff. This block just means that if we press escape or hit the close window button on the window, close the window.
 		sf::Event event;
 		while (window.pollEvent(event))
@@ -265,67 +245,63 @@ int main()
 					window.close();
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {				//reset the ball position if it's lost
-					position.setXYZ((WIDTH / 2.0f) - shape.getRadius(), (HEIGHT / 2.0f) - shape.getRadius());
-					velocity.setXYZ(0, 0);
-					acceleration.setXYZ(0, 9.81);
-					shape.setPosition(position.x, position.y);
+					rocket.reset();
 				}
 			}
 			if (event.type == sf::Event::MouseButtonPressed) {
 				holding = true;
 			}
 			if (event.type == sf::Event::MouseButtonReleased) {
+				if (grabbingAndHolding) {
+					if (deltaMouse.x != 0.0f || deltaMouse.y != 0.0f) {
+						rocket.setVel((rocket.getVel() + deltaMouse) * 15.0f);
+					}
+				}
+				
 				holding = false;
 				grabbingAndHolding = false;
-			}
-
-			else if (event.type == sf::Event::MouseWheelMoved)
-			{
-				// display number of ticks mouse wheel has moved
-				position.y += event.mouseWheel.delta * 10;
 			}
 		}
 
 		//clean the window, so previous frames are not visible
 		window.clear();
 
+		utils::startPullEvent(rocket);
+
 		//reset the clock and calculate fps
 		float currentTime = clock.restart().asSeconds();
 		dt = currentTime * 10;
 		int fps = 1.0f / currentTime;
-		lastTime = currentTime;
 
-		//update the position of our shape by dt
-		updateShape(shape, position, velocity, acceleration);
-
+		rocket.simStep(dt);
 		//if we are grabbing the shape, change the position of the ball to the mouse position
-		if (isGrabbing(shape) && holding || grabbingAndHolding) {
+		if (utils::isGrabbing(*(sf::CircleShape*)rocket.drawable) && holding || grabbingAndHolding) {
 			grabbingAndHolding = true;
-
-			position.setXYZ(sf::Mouse::getPosition(window).x - (shape.getRadius() * 2.0f), sf::Mouse::getPosition(window).y - (shape.getRadius() * 2.0f));
-			velocity.setXYZ(0, 0);
-			shape.setFillColor(sf::Color::Blue);
+			rocket.grab();
+			rocket.drawable->setFillColor(sf::Color::Blue);
 		}
 		else {
 			grabbingAndHolding = false;
+			rocket.drawable->setFillColor(sf::Color::Green);
+		}
+																																										//format the debug stats
+		stats = "posX: " + std::to_string(rocket.getPos().x) + "\nposY: " + std::to_string(rocket.getPos().y) + "\nfps: " + std::to_string(fps)			
+			+ "\nvelocityX: " + std::to_string(rocket.getVel().x) + "\nvelocityY: " + std::to_string(rocket.getVel().y) + "\ntimer: " + std::to_string(timer.getElapsedTime().asSeconds()) + "s"
+			+ "\nmousemovedelta: \nX" + std::to_string(deltaMouse.x) + " \nY" + std::to_string(deltaMouse.y);
+
+		text.setString(stats);
+		
+		curMousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
+		if (curMousePos != lastMousePos && holding) {
+			deltaMouse = curMousePos - lastMousePos;
+			lastMousePos = curMousePos;
 		}
 		
-		//format the debug stats
-		stats = "posX: " + std::to_string(position.x) + "\nposY: " + std::to_string(position.y) + "\nfps: " + std::to_string(fps)
-			+ "\nvelocityX: " + std::to_string(velocity.x) + "\nvelocityY: " + std::to_string(velocity.y) + "\ntimer: " + std::to_string(timer.getElapsedTime().asSeconds()) + "s";
-		text.setString(stats);
-		text.setPosition(WIDTH - (text.getGlobalBounds().width) - 20, 20);
-		
-		//draw our logo
+
+		window.draw(*rocket.drawable);
 		window.draw(bulldogRocketrySprite);
-
-		//draw the shape!
-		window.draw(shape);
-
-		//draw the debug text
 		window.draw(text);
 
-		//display drawn elements!
 		window.display();
 	}
 
