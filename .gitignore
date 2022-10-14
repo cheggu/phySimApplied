@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/phySimApplied/v16/Browse.VC.db
+/.vs/phySimApplied/v16/Browse.VC.opendb
+/.vs/phySimApplied/v16/ipch/AutoPCH
