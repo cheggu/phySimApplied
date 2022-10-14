@@ -11,6 +11,15 @@ is 0,0 but its bottom right is 10,10. To draw the square at a particular locatio
 */
 
 
+
+/*
+ --- TODO ---
+ - Wind
+ - Thrust
+ - Angular velocity or whatever the fuck its called
+*/
+
+
 //Libraries we want to include:
 #include "Includes.h"
 #include "Object.h"
@@ -28,7 +37,7 @@ float radius = 20.0f;
 
 sf::Vector2f lastMousePos;
 sf::Vector2f curMousePos;
-sf::Vector2f deltaMouse;
+sf::Vector2f deltaMouse; 
 
 //-------------------------------------------------MAIN FUNCTION-----------------------------------------------------------//
 int main()
