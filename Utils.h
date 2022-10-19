@@ -4,6 +4,19 @@
 
 namespace utils {
 	bool drawLinesBetween = false;
+	bool freeze = false;
+	bool drawDebugStats = true;
+
+	void freezeGravity(Rocket& rocket) {
+		if (freeze) {
+			rocket.reset();
+			rocket.setAcc({ 0.0f, 0.0f });
+		}
+		else {
+			rocket.reset();
+			rocket.setAcc({ 0.0f, 9.81f });
+		}
+	}
 
 
 	//if the distance between the mouse and the shape is less than the radius of the shape, return true
@@ -34,7 +47,13 @@ namespace utils {
 		}
 		else {
 			//reset the acceleration
-			rocket.setAcc({ 0, 9.81 });	
+			if (!utils::freeze) {
+				rocket.setAcc({ 0, 9.81 });
+			}
+			else {
+				rocket.setAcc({ 0, 0 });
+			}
+
 			drawLinesBetween = false;
 		}
 	}

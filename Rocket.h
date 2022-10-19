@@ -26,6 +26,10 @@ public:
 		return velocity;
 	}
 
+	sf::Vector2f getAcc() {
+		return acceleration;
+	}
+
 	void setAcc(sf::Vector2f a) {
 		acceleration = a;
 	}
@@ -47,7 +51,7 @@ public:
 
 	//returns new acceleration after applying a force to a mass
 	sf::Vector2f applyForce(sf::Vector2f force) {
-		setAcc({ force.x / mass, force.y / mass });
+		setAcc({ acceleration.x + (force.x / mass), acceleration.y + (force.y / mass) });
 		return acceleration;
 	}
 
@@ -67,7 +71,10 @@ public:
 
 		//to calculate the acceleration vector, we simply subtract the mouse vector and shape vector and 
 		//multiply by our arbitrary magnitude to produce a vector from the shape in the direction of the mouse
-		newAccelerationVector = { (mousex - drawable->getPosition().x) * magnitude, ((mousey - drawable->getPosition().y) * magnitude) + 9.81f };
+		newAccelerationVector = { 
+			(mousex - drawable->getPosition().x) * magnitude,
+			((mousey - drawable->getPosition().y) * magnitude) + 9.81f 
+		};
 
 		acceleration = newAccelerationVector;
 	}

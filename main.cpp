@@ -81,8 +81,18 @@ int main()
 	//text.setPosition(WIDTH - (text.getGlobalBounds().width * 2), 20);
 	std::string stats = "";
 	text.setString(stats);
-	text.setPosition(WIDTH - 220, 20);
+	text.setPosition(WIDTH - 220, HEIGHT - 300);
 
+	sf::Text controls;
+	controls.setFont(font);
+	controls.setCharacterSize(20);
+	controls.setStyle(sf::Text::Style::Bold);
+	controls.setOutlineColor(sf::Color::Blue);
+	controls.setOutlineThickness(1);
+	controls.setFillColor(sf::Color::White);
+	std::string strControls = ("F   -   FREEZE/UNFREEZE GRAVITY\nR   -   RESET ROCKET\nD   -   SHOW/HIDE DEBUG STATS\nLEFT MOUSE (CLICK)   -   GRAB ROCKET\nLEFT CLICK (HOLD)   -   ACC ROCKET TOWARDS MOUSE");
+	controls.setString(strControls);
+	controls.setPosition((WIDTH - controls.getGlobalBounds().width) - 20, 20);
 	//clock we use to claculate fps and dt
 	sf::Clock clock;
 
@@ -118,6 +128,13 @@ int main()
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {				//reset the ball position if it's lost
 					rocket.reset();
 				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
+					utils::freeze = !utils::freeze;
+					utils::freezeGravity(rocket);
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+					utils::drawDebugStats = !utils::drawDebugStats;
+				}
 			}
 			if (event.type == sf::Event::MouseButtonPressed) {
 				holding = true;
@@ -137,8 +154,8 @@ int main()
 		//clean the window, so previous frames are not visible
 		window.clear();
 
-		utils::startPullEvent(rocket);
-
+		utils::startPullEvent(rocket);		
+		
 		//reset the clock and calculate fps
 		float currentTime = clock.restart().asSeconds();
 		dt = currentTime * 10;
@@ -156,18 +173,25 @@ int main()
 			rocket.drawable->setFillColor(sf::Color::Green);
 		}
 																																										//format the debug stats
-		stats = "posX: " + std::to_string(rocket.getPos().x) + "\nposY: " + std::to_string(rocket.getPos().y) + "\nfps: " + std::to_string(fps)			
-			+ "\nvelocityX: " + std::to_string(rocket.getVel().x) + "\nvelocityY: " + std::to_string(rocket.getVel().y) + "\ntimer: " + std::to_string(timer.getElapsedTime().asSeconds()) + "s"
-			+ "\nmousemovedelta: \nX" + std::to_string(deltaMouse.x) + " \nY" + std::to_string(deltaMouse.y);
+		stats = "posX: " + std::to_string(rocket.getPos().x) 
+			+ "\nposY: " + std::to_string(rocket.getPos().y) 
+			+ "\nfps: " + std::to_string(fps)			
+			+ "\nvelocityX: " + std::to_string(rocket.getVel().x) 
+			+ "\nvelocityY: " + std::to_string(rocket.getVel().y) 
+			+ "\ntimer: " + std::to_string(timer.getElapsedTime().asSeconds()) + "s"
+			+ "\nmousemovedelta: \nX" + std::to_string(deltaMouse.x) 
+			+ " \nY" + std::to_string(deltaMouse.y) 
+			+ "\naccX: " + std::to_string(rocket.getAcc().x)
+			+ "\naccY: " + std::to_string(rocket.getAcc().y);
 
 		text.setString(stats);
+		text.setPosition({ (WIDTH - text.getGlobalBounds().width) - 20, (HEIGHT - text.getGlobalBounds().height) - 70 });
 		
 		curMousePos = (sf::Vector2f)sf::Mouse::getPosition(window);
-		if (curMousePos != lastMousePos && holding) {
+		if (curMousePos != lastMousePos) {
 			deltaMouse = curMousePos - lastMousePos;
 			lastMousePos = curMousePos;
-		}
-		
+		}		
 
 		window.draw(spaceSprite);
 		if (utils::drawLinesBetween) {
@@ -185,7 +209,11 @@ int main()
 
 		window.draw(*rocket.drawable);
 		window.draw(bulldogRocketrySprite);
-		window.draw(text);
+		window.draw(controls);
+		if (utils::drawDebugStats) {
+			window.draw(text);
+		}
+		
 
 
 		window.display();

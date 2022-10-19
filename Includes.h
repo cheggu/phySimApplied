@@ -4,8 +4,8 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 
-#define WIDTH 2560
-#define HEIGHT 1440 
+#define WIDTH 1920
+#define HEIGHT 1080 
 
 //window is created.
 sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Kinematics");
