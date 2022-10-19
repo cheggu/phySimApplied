@@ -7,13 +7,15 @@ private:
 	bool grabbable = true;
 	bool gravitymouse = false;
 
+	sf::Vector2f accelerationConstant;
+
 	void setPos(sf::Vector2f newPos) {
 		position = newPos;
 	}
 
 public:
 	Rocket(sf::Vector2f pos, float m, sf::CircleShape& shape) {
-		setPos(pos); setVel({ 0.0f, 0.0f }); setAcc({ 0.0f, 9.81f });
+		setPos(pos); setVel({ 0.0f, 0.0f }); setAcc({ 0.0f, 9.81f }); accelerationConstant = acceleration;
 		mass = m;
 		drawable = &shape;
 	}
@@ -71,12 +73,20 @@ public:
 
 		//to calculate the acceleration vector, we simply subtract the mouse vector and shape vector and 
 		//multiply by our arbitrary magnitude to produce a vector from the shape in the direction of the mouse
+
 		newAccelerationVector = { 
 			(mousex - drawable->getPosition().x) * magnitude,
-			((mousey - drawable->getPosition().y) * magnitude) + 9.81f 
+			((mousey - drawable->getPosition().y) * magnitude) + accelerationConstant.y
 		};
 
 		acceleration = newAccelerationVector;
+	}
+
+	//sets the default force of acceleration due to gravity, 
+	//ie if you want to simulate the forces of gravity in space
+	//you would do "rocket.setAccelerationConstant({0.0f, 0.0f});
+	void setAccelerationConstant(sf::Vector2f aConst) {
+		accelerationConstant = aConst;
 	}
 
 	void reset() {

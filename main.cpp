@@ -91,6 +91,7 @@ int main()
 	controls.setOutlineThickness(1);
 	controls.setFillColor(sf::Color::White);
 	std::string strControls = ("F   -   FREEZE/UNFREEZE GRAVITY\nR   -   RESET ROCKET\nD   -   SHOW/HIDE DEBUG STATS\nLEFT MOUSE (CLICK)   -   GRAB ROCKET\nLEFT CLICK (HOLD)   -   ACC ROCKET TOWARDS MOUSE");
+	strControls += "\n- / +   -   DECREASE/INCREASE THROW SENSITIVITY";
 	controls.setString(strControls);
 	controls.setPosition((WIDTH - controls.getGlobalBounds().width) - 20, 20);
 	//clock we use to claculate fps and dt
@@ -135,6 +136,12 @@ int main()
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
 					utils::drawDebugStats = !utils::drawDebugStats;
 				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash)) {
+					utils::throwSensitivity -= 0.1f;
+				}
+				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal)) {
+					utils::throwSensitivity += 0.1f;
+				}
 			}
 			if (event.type == sf::Event::MouseButtonPressed) {
 				holding = true;
@@ -142,7 +149,7 @@ int main()
 			if (event.type == sf::Event::MouseButtonReleased) {
 				if (grabbingAndHolding) {
 					if (deltaMouse.x != 0.0f || deltaMouse.y != 0.0f) {
-						rocket.setVel((rocket.getVel() + deltaMouse) * 15.0f);
+						rocket.setVel((rocket.getVel() + deltaMouse) * utils::throwSensitivity);
 					}
 				}
 				
@@ -173,16 +180,17 @@ int main()
 			rocket.drawable->setFillColor(sf::Color::Green);
 		}
 																																										//format the debug stats
-		stats = "posX: " + std::to_string(rocket.getPos().x) 
-			+ "\nposY: " + std::to_string(rocket.getPos().y) 
-			+ "\nfps: " + std::to_string(fps)			
-			+ "\nvelocityX: " + std::to_string(rocket.getVel().x) 
-			+ "\nvelocityY: " + std::to_string(rocket.getVel().y) 
+		stats = "posX: " + std::to_string(rocket.getPos().x)
+			+ "\nposY: " + std::to_string(rocket.getPos().y)
+			+ "\nfps: " + std::to_string(fps)
+			+ "\nvelocityX: " + std::to_string(rocket.getVel().x)
+			+ "\nvelocityY: " + std::to_string(rocket.getVel().y)
 			+ "\ntimer: " + std::to_string(timer.getElapsedTime().asSeconds()) + "s"
-			+ "\nmousemovedelta: \nX" + std::to_string(deltaMouse.x) 
-			+ " \nY" + std::to_string(deltaMouse.y) 
+			+ "\nmousemovedelta: \nX" + std::to_string(deltaMouse.x)
+			+ " \nY" + std::to_string(deltaMouse.y)
 			+ "\naccX: " + std::to_string(rocket.getAcc().x)
-			+ "\naccY: " + std::to_string(rocket.getAcc().y);
+			+ "\naccY: " + std::to_string(rocket.getAcc().y)
+			+ "\nthrow sensitivity: " + std::to_string(utils::throwSensitivity);
 
 		text.setString(stats);
 		text.setPosition({ (WIDTH - text.getGlobalBounds().width) - 20, (HEIGHT - text.getGlobalBounds().height) - 70 });
@@ -192,6 +200,10 @@ int main()
 			deltaMouse = curMousePos - lastMousePos;
 			lastMousePos = curMousePos;
 		}		
+		if (deltaMouse.x <= 1.0f && deltaMouse.y <= 1.0f && deltaMouse.x >= -1.0f && deltaMouse.y >= -1.0f)
+		{
+			deltaMouse = { 0.0f, 0.0f };
+		}
 
 		window.draw(spaceSprite);
 		if (utils::drawLinesBetween) {

@@ -6,15 +6,16 @@ namespace utils {
 	bool drawLinesBetween = false;
 	bool freeze = false;
 	bool drawDebugStats = true;
+	float throwSensitivity = 4.0f;
 
 	void freezeGravity(Rocket& rocket) {
 		if (freeze) {
 			rocket.reset();
-			rocket.setAcc({ 0.0f, 0.0f });
+			rocket.setAccelerationConstant({ 0.0f, 0.0f });
 		}
 		else {
 			rocket.reset();
-			rocket.setAcc({ 0.0f, 9.81f });
+			rocket.setAccelerationConstant({ 0.0f, 9.81f });
 		}
 	}
 
