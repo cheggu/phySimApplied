@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="Includes.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="rkBody.h" />
     <ClInclude Include="Rocket.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

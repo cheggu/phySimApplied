@@ -26,6 +26,8 @@ is 0,0 but its bottom right is 10,10. To draw the square at a particular locatio
 #include "Rocket.h"
 #include "Utils.h"
 
+#include "rkBody.h"
+
 double timeElapsed = 0;
 
 //dt is set at a fraction of the framerate. So instead of updating where it should be an arbitrary number of times, it updates where we should be 
@@ -96,6 +98,10 @@ int main()
 	controls.setPosition((WIDTH - controls.getGlobalBounds().width) - 20, 20);
 	//clock we use to claculate fps and dt
 	sf::Clock clock;
+
+
+	rkBody rk = rkBody({ 0.0f, 0.0f });
+
 
 	//creating our ball. It is green!
 	sf::CircleShape shape(radius);
@@ -218,7 +224,11 @@ int main()
 			window.draw(vertices, 2, sf::Lines);
 		}
 
-
+		if (TEST_RK) {
+			float rky = rk.rk_next_pos(dt).y;
+			std::cout << rky << std::endl;
+		}
+		
 		window.draw(*rocket.drawable);
 		window.draw(bulldogRocketrySprite);
 		window.draw(controls);

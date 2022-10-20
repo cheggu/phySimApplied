@@ -43,8 +43,9 @@ public:
 	//simulate rocket by one "step", or delta t. 
 	//returns new position after one step
 	sf::Vector2f simStep(float step) {
-		setPos(position + (velocity * step));
 		setVel(velocity + (acceleration * step));
+		setPos(position + (velocity * step));
+		
 
 		updateShape();
 
@@ -96,6 +97,8 @@ public:
 		setAcc({ 0.0f, 9.81f });
 		drawable->setPosition(position);
 	}
+
+
 
 	void grab() {
 		sf::Vector2f grabPos = { sf::Mouse::getPosition(window).x - (mass), sf::Mouse::getPosition(window).y - (mass) };
