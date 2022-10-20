@@ -3,6 +3,8 @@
 #include "Object.h"
 #include <iostream>
 
+//https://www.youtube.com/watch?v=TtgS-b191V0&ab_channel=AngeTheGreat
+
 class rkBody : public Object{
 public:
 	float h = 0.0025;
