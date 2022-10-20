@@ -24,11 +24,11 @@ C:\Users\benja\Desktop\phySimApplied\Utils.h(52,30): warning C4305: 'argument': 
           [
               T=float
           ]
-C:\Users\benja\Desktop\phySimApplied\rkBody.h(8,10): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\benja\Desktop\phySimApplied\rkBody.h(10,10): warning C4305: 'initializing': truncation from 'double' to 'float'
 C:\Users\benja\Desktop\phySimApplied\main.cpp(175,11): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   Generating code
-  15 of 217 functions ( 6.9%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+  9 of 217 functions ( 4.1%) were compiled, the rest were copied from previous compilation.
+    8 functions were new in current compilation
     1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   phySimApplied.vcxproj -> C:\Users\benja\Desktop\phySimApplied\x64\Release\phySimApplied.exe

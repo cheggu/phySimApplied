@@ -6,7 +6,7 @@
 //https://www.youtube.com/watch?v=TtgS-b191V0&ab_channel=AngeTheGreat
 
 class rkBody : public Object{
-public:
+private:
 	float h = 0.0025;
 	float timeElapsed = 0.0f;
 
@@ -84,7 +84,7 @@ public:
 		return cur;
 	}
 
-//public:
+public:
 	//constructors
 	rkBody(sf::Vector2f initpos) {
 		position = initpos;
